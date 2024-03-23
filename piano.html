@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MIDI Piano Key Detection</title>
+<style>
+    body {
+        background-image: url('https://images.pexels.com/photos/164743/pexels-photo-164743.jpeg?cs=srgb&dl=acoustic-brand-brass-164743.jpg&fm=jpg');
+        background-size: cover;
+        background-position: center;
+        font-family: Arial, sans-serif;
+        color: white;
+        text-align: center;
+    }
+
+    h1 {
+        margin-top: 50px;
+    }
+
+    #keyDisplay {
+        font-size: 24px;
+        margin-top: 50px;
+    }
+</style>
+</head>
+<body>
+<h1>MIDI Piano Key Detection</h1>
+<p id="keyDisplay">Press a key on your MIDI piano...</p>
+
+<script>
+// Function to convert MIDI note number to key name
+function noteToKey(note) {
+    const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const octave = Math.floor(note / 12) - 1;
+    const keyIndex = note % 12;
+    return notes[keyIndex] + octave;
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    // Check for MIDI support
+    if (navigator.requestMIDIAccess) {
+        navigator.requestMIDIAccess()
+            .then(onMIDISuccess, onMIDIFailure);
+    } else {
+        console.log('Web MIDI is not supported');
+    }
+});
+
+// Function called when MIDI access is successful
+function onMIDISuccess(midiAccess) {
+    console.log('MIDI ready!');
+
+    // Get the first available input device
+    const input = midiAccess.inputs.values().next().value;
+
+    // Add event listener for MIDI messages
+    input.onmidimessage = function(event) {
+        const [command, note, velocity] = event.data;
+
+        // Display the played key
+        displayKey(note);
+    };
+}
+
+// Function called when MIDI access fails
+function onMIDIFailure() {
+    console.log('Failed to access MIDI');
+}
+
+// Function to display the played key
+function displayKey(note) {
+    const keyDisplay = document.getElementById('keyDisplay');
+    keyDisplay.textContent = 'You played: ' + noteToKey(note);
+}
+</script>
+</body>
+</html>
